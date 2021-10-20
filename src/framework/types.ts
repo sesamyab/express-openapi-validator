@@ -114,7 +114,7 @@ export type SerDesMap = {
 
 export interface OpenApiValidatorOpts {
   apiSpec: OpenAPIV3.Document | string;
-  serveSpecs: boolean;
+  serveSpecs?: boolean;
   validateApiSpec?: boolean;
   validateResponses?: boolean | ValidateResponseOpts;
   validateRequests?: boolean | ValidateRequestOpts;
