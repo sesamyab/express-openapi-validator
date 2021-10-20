@@ -139,6 +139,17 @@ export class OpenApiValidator {
     });
 
     // metadata middleware
+    let specmw;
+    if (this.options.serveSpecs) {
+      middlewares.push(function serveSpecs(req, res, next) {
+        return pContext
+        .then(({ context, responseApiDoc }) => {
+          specmw = specmw || self.serveOpenApiSpec(context, responseApiDoc);
+          return metamw(req, res, next);
+        })
+        .catch(next);
+      })
+    }
     let metamw;
     middlewares.push(function metadataMiddleware(req, res, next) {
       return pContext
@@ -251,6 +262,13 @@ export class OpenApiValidator {
         },
       );
     }
+  }
+
+  private serveOpenApiSpec(
+    context: OpenApiContext,
+    responseApiDoc: OpenAPIV3.Document,
+  ) {
+    return middlewares.serveOpenApiSpec(context, responseApiDoc);
   }
 
   private metadataMiddleware(

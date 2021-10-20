@@ -3,3 +3,4 @@ export { RequestValidator } from './openapi.request.validator';
 export { ResponseValidator } from './openapi.response.validator';
 export { multipart } from './openapi.multipart';
 export { security } from './openapi.security';
+export { serveOpenApiSpec } from './openapi.spec';
