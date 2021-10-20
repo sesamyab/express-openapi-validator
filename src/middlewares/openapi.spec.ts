@@ -14,7 +14,7 @@ export function serveOpenApiSpec(
     // note base path is empty when path is fully qualified i.e. req.path.startsWith('')
     const path = req.path.startsWith(req.baseUrl)
       ? req.path
-      : `${req.baseUrl}/${req.path}`;
+      : `${req.baseUrl}${req.path}`;
     if (path === `${req.baseUrl}/spec`) {
       res.status(200);
       res.set('Content-type','application/json');

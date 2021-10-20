@@ -145,7 +145,7 @@ export class OpenApiValidator {
         return pContext
         .then(({ context, responseApiDoc }) => {
           specmw = specmw || self.serveOpenApiSpec(context, responseApiDoc);
-          return metamw(req, res, next);
+          return specmw(req, res, next);
         })
         .catch(next);
       })
