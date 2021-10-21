@@ -95,6 +95,7 @@ export class OpenApiValidator {
     const pContext = spec
       .then((spec) => {
         const apiDoc = spec.apiDoc;
+        const rawApiDocs = JSON.stringify(apiDoc);
         const ajvOpts = this.ajvOpts.preprocessor;
         const resOpts = this.options.validateResponses as ValidateRequestOpts;
         const sp = new SchemaPreprocessor(
@@ -103,6 +104,7 @@ export class OpenApiValidator {
           resOpts,
         ).preProcess();
         return {
+          rawApiDocs,
           context: new OpenApiContext(spec, this.options.ignorePaths, this.options.ignoreUndocumented),
           responseApiDoc: sp.apiDocRes,
           error: null,
@@ -110,6 +112,7 @@ export class OpenApiValidator {
       })
       .catch((e) => {
         return {
+          rawApiDocs: null,
           context: null,
           responseApiDoc: null,
           error: e,
@@ -143,8 +146,8 @@ export class OpenApiValidator {
     if (this.options.serveSpecs) {
       middlewares.push(function serveSpecs(req, res, next) {
         return pContext
-        .then(({ context, responseApiDoc }) => {
-          specmw = specmw || self.serveOpenApiSpec(context, responseApiDoc);
+        .then(({ rawApiDocs }) => {
+          specmw = specmw || self.serveOpenApiSpec(rawApiDocs);
           return specmw(req, res, next);
         })
         .catch(next);
@@ -265,10 +268,9 @@ export class OpenApiValidator {
   }
 
   private serveOpenApiSpec(
-    context: OpenApiContext,
-    responseApiDoc: OpenAPIV3.Document,
+    rawAPiDocs: string,
   ) {
-    return middlewares.serveOpenApiSpec(context, responseApiDoc);
+    return middlewares.serveOpenApiSpec(rawAPiDocs);
   }
 
   private metadataMiddleware(

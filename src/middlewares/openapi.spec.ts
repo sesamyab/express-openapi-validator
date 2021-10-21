@@ -7,9 +7,8 @@ import {
 } from '../framework/types';
 
 export function serveOpenApiSpec(
-  openApiContext: OpenApiContext,
-  responseApiDoc: OpenAPIV3.Document,
-): OpenApiRequestHandler {
+  rawAPiDocs: string,
+  ): OpenApiRequestHandler {
   return (req: OpenApiRequest, res: Response, next: NextFunction): void => {
     // note base path is empty when path is fully qualified i.e. req.path.startsWith('')
     const path = req.path.startsWith(req.baseUrl)
@@ -19,7 +18,7 @@ export function serveOpenApiSpec(
       res.status(200);
       res.set('Content-type','application/json');
       res.set('Cache-control','max-age=3600');
-      res.send(openApiContext.apiDoc);
+      res.send(rawAPiDocs);
     } else
       return next();
   };
