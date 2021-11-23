@@ -98,23 +98,29 @@ export class SerDesSingleton implements SerDes {
     this.deserializer = {
       format: param.format,
       jsonType: param.jsonType || 'object',
-      deserialize: param.deserialize
-    }
+      deserialize: param.deserialize,
+    };
     this.serializer = {
       format: param.format,
       jsonType: param.jsonType || 'object',
-      serialize: param.serialize
-    }
+      serialize: param.serialize,
+    };
   }
-};
+}
 
 export type SerDesMap = {
-  [format: string]: SerDes
+  [format: string]: SerDes;
 };
+
+export interface SpecOverride {
+  path: string;
+  value: string;
+}
 
 export interface OpenApiValidatorOpts {
   apiSpec: OpenAPIV3.Document | string;
   serveSpecs?: boolean;
+  specOverrides?: SpecOverride[];
   validateApiSpec?: boolean;
   validateResponses?: boolean | ValidateResponseOpts;
   validateRequests?: boolean | ValidateRequestOpts;

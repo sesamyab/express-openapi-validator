@@ -1,4 +1,5 @@
 import * as cloneDeep from 'lodash.clonedeep';
+import * as set from 'lodash.set';
 import * as res from './resolvers';
 import { OpenApiValidator, OpenApiValidatorOpts } from './openapi.validator';
 import { OpenApiSpecLoader } from './framework/openapi.spec.loader';
@@ -35,9 +36,15 @@ function openapiValidator(options: OpenApiValidatorOpts) {
   const oav = new OpenApiValidator(options);
   exports.middleware._oav = oav;
 
+  const overrides = options.specOverrides || [];
+  const apiDoc = overrides.reduce(
+    (acc, override) => set(acc, override.path, override.value),
+    cloneDeep(options.apiSpec),
+  );
+
   return oav.installMiddleware(
     new OpenApiSpecLoader({
-      apiDoc: cloneDeep(options.apiSpec),
+      apiDoc,
       validateApiSpec: options.validateApiSpec,
       $refParser: options.$refParser,
     }).load(),
