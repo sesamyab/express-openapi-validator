@@ -36,15 +36,9 @@ function openapiValidator(options: OpenApiValidatorOpts) {
   const oav = new OpenApiValidator(options);
   exports.middleware._oav = oav;
 
-  const overrides = options.specOverrides || [];
-  const apiDoc = overrides.reduce(
-    (acc, override) => set(acc, override.path, override.value),
-    cloneDeep(options.apiSpec),
-  );
-
   return oav.installMiddleware(
     new OpenApiSpecLoader({
-      apiDoc,
+      apiDoc: options.apiSpec,
       validateApiSpec: options.validateApiSpec,
       $refParser: options.$refParser,
     }).load(),
