@@ -1,6 +1,7 @@
 import ono from 'ono';
 import * as express from 'express';
 import * as _uniq from 'lodash.uniq';
+import * as set from 'lodash.set';
 import * as middlewares from './middlewares';
 import { Application, Response, NextFunction, Router } from 'express';
 import { OpenApiContext } from './framework/openapi.context';
@@ -95,6 +96,12 @@ export class OpenApiValidator {
     const pContext = spec
       .then((spec) => {
         const apiDoc = spec.apiDoc;
+        const overrides = this.options.specOverrides || [];
+
+        overrides.forEach((override) => {
+          set(apiDoc, override.path, override.value);
+        });
+
         const rawApiDocs = JSON.stringify(apiDoc);
         const ajvOpts = this.ajvOpts.preprocessor;
         const resOpts = this.options.validateResponses as ValidateRequestOpts;
@@ -105,7 +112,11 @@ export class OpenApiValidator {
         ).preProcess();
         return {
           rawApiDocs,
-          context: new OpenApiContext(spec, this.options.ignorePaths, this.options.ignoreUndocumented),
+          context: new OpenApiContext(
+            spec,
+            this.options.ignorePaths,
+            this.options.ignoreUndocumented,
+          ),
           responseApiDoc: sp.apiDocRes,
           error: null,
         };
@@ -146,12 +157,12 @@ export class OpenApiValidator {
     if (this.options.serveSpecs) {
       middlewares.push(function serveSpecs(req, res, next) {
         return pContext
-        .then(({ rawApiDocs }) => {
-          specmw = specmw || self.serveOpenApiSpec(rawApiDocs);
-          return specmw(req, res, next);
-        })
-        .catch(next);
-      })
+          .then(({ rawApiDocs }) => {
+            specmw = specmw || self.serveOpenApiSpec(rawApiDocs);
+            return specmw(req, res, next);
+          })
+          .catch(next);
+      });
     }
     let metamw;
     middlewares.push(function metadataMiddleware(req, res, next) {
@@ -215,7 +226,7 @@ export class OpenApiValidator {
             return resmw(req, res, next);
           })
           .catch(next);
-      })
+      });
     }
 
     // op handler middleware
@@ -267,9 +278,7 @@ export class OpenApiValidator {
     }
   }
 
-  private serveOpenApiSpec(
-    rawAPiDocs: string,
-  ) {
+  private serveOpenApiSpec(rawAPiDocs: string) {
     return middlewares.serveOpenApiSpec(rawAPiDocs);
   }
 
